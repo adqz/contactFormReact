@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import axios from 'axios';
 import MyTextField from './myTextField';
 import MyButton from './myButton';
 
@@ -15,6 +16,8 @@ class ContactForm extends Component {
         // Binding event handlers
         this.updateContactInformation=this.updateContactInformation.bind(this);
         this.onButtonPress=this.onButtonPress.bind(this);
+        
+        this.urlByPassCors = "https://cors-anywhere.herokuapp.com/";
     }
 
     updateContactInformation = (updatedContactInformation) => {
@@ -24,6 +27,19 @@ class ContactForm extends Component {
     onButtonPress(event) {
         event.preventDefault()
         console.log(JSON.stringify(this.state.contactInformation))
+        axios({
+            url: this.urlByPassCors + 'https://nwszrqrum8.execute-api.us-west-2.amazonaws.com/test2_cors/email',
+            host: 'https://nwszrqrum8.execute-api.us-west-2.amazonaws.com/',
+            method: 'POST',
+            path: '/test2_cors/email',
+            data: JSON.stringify(this.state.contactInformation),
+        })
+        .then(response => {
+            console.log(response)
+        })
+        .catch(error => {
+            console.log(error)
+        })
     }
 
     render() {

@@ -4,7 +4,6 @@ import { Button } from '@material-ui/core';
 class MyButton extends React.Component{
     constructor(props) {
         super(props);
-        console.log(props)
     }
     myButtonPress = (event) => {
         this.props.onButtonPress(event)

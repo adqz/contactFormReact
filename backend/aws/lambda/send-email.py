@@ -2,20 +2,15 @@ import json
 import boto3
 
 clientSES = boto3.client('ses')
+clientDB  = boto3.client('dynamodb')
 
 def lambda_handler(event, context):
-    # 1. Parse info sent in
-    # print('------------- START: DEBUG -------------')
-    # print('type(event) = ', type(event))
-    # print('event.keys() = ', event.keys())
-    # print('------------- END: DEBUG -------------')
-    
+    # 1. Parse info    
     name = event['queryStringParameters']['name']
     toEmail = event['queryStringParameters']['email']
     message = event['queryStringParameters']['message']
-    print(f'name={name}, email={toEmail}, message={message}')
 
-    # 2. Forming email
+    # 2. Email
     subject = f'{name}, your inquiry has been received by MKDecision'
     message_body = f'''Dear {name},\n
     Your inquiry has been received. Someone from MKDecision will get back to you within 2-3 business days.

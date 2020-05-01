@@ -16,7 +16,13 @@ class ContactForm extends Component {
         // Binding event handlers
         this.updateContactInformation=this.updateContactInformation.bind(this);
         this.onButtonPress=this.onButtonPress.bind(this);
-        
+        // RegEx patterns to validate fields
+        this.regExPatterns = {
+            name: /^[a-zA-Z ]{2,30}$/,
+            email: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+            message: "",
+        };
+        // URL to prepend to POST request. This will temporarily bypass CORS issue.
         this.urlByPassCors = "https://cors-anywhere.herokuapp.com/";
     }
 
@@ -26,7 +32,6 @@ class ContactForm extends Component {
     
     onButtonPress(event) {
         event.preventDefault()
-        console.log(JSON.stringify(this.state.contactInformation))
         axios({
             url: this.urlByPassCors + 'https://nwszrqrum8.execute-api.us-west-2.amazonaws.com/test2_cors/email',
             host: 'https://nwszrqrum8.execute-api.us-west-2.amazonaws.com/',
@@ -51,6 +56,7 @@ class ContactForm extends Component {
                         label='Name'
                         contactInformation={this.state.contactInformation}
                         updateContactInformation={this.updateContactInformation}
+                        pattern={this.regExPatterns.name}
                     />
                 </div>
                 <div>
@@ -59,6 +65,7 @@ class ContactForm extends Component {
                         label='Email'
                         contactInformation={this.state.contactInformation}
                         updateContactInformation={this.updateContactInformation}
+                        pattern={this.regExPatterns.email}
                     />
                 </div>
                 <div>
@@ -67,6 +74,7 @@ class ContactForm extends Component {
                         label='Message'
                         contactInformation={this.state.contactInformation}
                         updateContactInformation={this.updateContactInformation}
+                        pattern={this.regExPatterns.message}
                     />
                 </div>
                 <div>

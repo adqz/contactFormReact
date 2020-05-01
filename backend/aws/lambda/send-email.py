@@ -4,30 +4,30 @@ import boto3
 clientSES = boto3.client('ses')
 
 def lambda_handler(event, context):
-    # 1. Parse info sent in
-    # print('------------- START: DEBUG -------------')
-    # print('type(event) = ', type(event))
-    # print('event.keys() = ', event.keys())
-    # print("event['body'] = ", event['body'])
-    # print("event['pathParameters'] = ", event['pathParameters'])
-    # print("event['stageVariables'] = ", event['stageVariables'])
-    # print("event['resource'] = ", event['resource'])
-    # print(json.loads(event['body']))
-    # print('------------- END: DEBUG -------------')
-    body = json.loads(event['body'])
-    name    = body['name']
-    toEmail = body['email']
-    message = body['message']
-    print(f'name={name}, email={toEmail}, message={message}')
+    # 1. Parse info
+    try:
+        body    = json.loads(event['body'])
+        name    = body['name']
+        toEmail = body['email']
+        message = body['message']
+    except KeyError:
+        return {
+            'statusCode': 501,
+            'body': 'Argument(s) not found with keys namely "name", "email", "message" ',
+        }
+    except error:
+        return {
+            'statusCode': 500,
+            'body': f'Server Error: {str(error)} ',
+        }
 
-    # 2. Forming email
-    subject = f'{name}, your inquiry has been received by MKDecision'
-    message_body = f'''Dear {name},\n
-    Your inquiry has been received. Someone from MKDecision will get back to you within 2-3 business days.
-    For record keeping purpose, the following is the message you sent us: \n {message} '''
-    destination = {
-        'ToAddresses': [toEmail],
-    }
+    # 2. Form email
+    source       = 'adnanqzs@gmail.com'
+    subject      = f'{name}, your inquiry has been received by MKDecision'
+    destination  = {'ToAddresses': [toEmail]}
+    message_body = f'''Dear {name},\n \
+        Your inquiry has been received. Someone from MKDecision will get back to you within 2-3 business days.\
+For record keeping purpose, the following is the message you sent us: \n\n "{message}" '''
     message = {
         'Subject': {
             'Data': subject,
@@ -40,27 +40,26 @@ def lambda_handler(event, context):
             },
         },
     }
-    response = clientSES.send_email(Source = 'adnanqzs@gmail.com', Destination = destination, Message = message)
-    print('------------- START: DEBUG -------------')
-    print('type(response) = ', type(response))
-    print('response.keys() = ', response.keys())
-    print('------------- END: DEBUG -------------')
-    apiResponse = {
-        'name': name,
-        'email': toEmail,
-        'reply': 'Name and email received succesfully. Email will be sent now'
-    }
+    # 3. Send Email
+    try:
+        response = clientSES.send_email(Source = source, Destination = destination, Message = message)
+    except error:
+        return {
+            'statusCode': 500,
+            'body': f'AWS SES Error: {str(error)} ',
+        }
+
+    responseStatus    = int(response['ResponseMetadata']['HTTPStatusCode'])
+    responseRequestId = response['ResponseMetadata']['RequestId']
     
-    apiResponseObject = {
-        'statusCode': 200,
-        'headers': {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': "http://localhost:3000",
-            # 'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': '*',
-            
-        },
-        'body': json.dumps(apiResponse)
-    }
-    
-    return apiResponseObject
+    # 4. Return status of request
+    if responseStatus == 200:
+        return {
+            'statusCode': 200,
+            'body': 'Information received succesfully. Email will be sent now',
+        }
+    else:
+        return {
+            'statusCode': 500,
+            'body': f'Could not send email. To follow up, please note the RequestId: {responseRequestId}',
+        }

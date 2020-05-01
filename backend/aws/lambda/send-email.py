@@ -2,15 +2,25 @@ import json
 import boto3
 
 clientSES = boto3.client('ses')
-clientDB  = boto3.client('dynamodb')
 
 def lambda_handler(event, context):
-    # 1. Parse info    
-    name = event['queryStringParameters']['name']
-    toEmail = event['queryStringParameters']['email']
-    message = event['queryStringParameters']['message']
+    # 1. Parse info sent in
+    # print('------------- START: DEBUG -------------')
+    # print('type(event) = ', type(event))
+    # print('event.keys() = ', event.keys())
+    # print("event['body'] = ", event['body'])
+    # print("event['pathParameters'] = ", event['pathParameters'])
+    # print("event['stageVariables'] = ", event['stageVariables'])
+    # print("event['resource'] = ", event['resource'])
+    # print(json.loads(event['body']))
+    # print('------------- END: DEBUG -------------')
+    body = json.loads(event['body'])
+    name    = body['name']
+    toEmail = body['email']
+    message = body['message']
+    print(f'name={name}, email={toEmail}, message={message}')
 
-    # 2. Email
+    # 2. Forming email
     subject = f'{name}, your inquiry has been received by MKDecision'
     message_body = f'''Dear {name},\n
     Your inquiry has been received. Someone from MKDecision will get back to you within 2-3 business days.
@@ -44,7 +54,11 @@ def lambda_handler(event, context):
     apiResponseObject = {
         'statusCode': 200,
         'headers': {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': "http://localhost:3000",
+            # 'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': '*',
+            
         },
         'body': json.dumps(apiResponse)
     }

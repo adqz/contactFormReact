@@ -3,7 +3,7 @@ import axios from "axios";
 import MyTextField from "./myTextField";
 import MyButton from "./myButton";
 import Google from "./google";
-import { TextField, Button, Card, CardContent } from "@material-ui/core";
+import { Card } from "@material-ui/core";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import { Alert, AlertTitle } from "@material-ui/lab";
@@ -21,14 +21,13 @@ class ContactForm extends Component {
         staus: null,
         data: null,
       },
-      stepIndex: 1,
+      stepIndex: 2,
       error: [],
     };
     // Binding event handlers
     this.updateContactInformation = this.updateContactInformation.bind(this);
     this.onButtonPress = this.onButtonPress.bind(this);
     this.pageLevelValidation = this.pageLevelValidation.bind(this);
-    this.onGoogleLogin = this.onGoogleLogin.bind(this);
     // RegEx patterns to validate fields
     this.regExPatterns = {
       name: /^[a-zA-Z ]{2,30}$/,
@@ -52,6 +51,7 @@ class ContactForm extends Component {
           message: "",
         },
         stepIndex: 3,
+        error: [],
       });
     } else if (response.status === 500 && response.status === 400) {
       let ApiError = [];
@@ -97,17 +97,15 @@ class ContactForm extends Component {
       } else {
         let errorMessages = [];
         for (let errorType in errors) {
-          errorMessages.push(
-            errors[errorType].map((val) => {
-              if (errorType === "required") {
-                return val.toUpperCase() + " field is a mandatory.";
-              } else if (errorType === "regex") {
-                return val.toUpperCase() + "field is invalid.";
-              }
-            })
-          );
+          errors[errorType].map((val) => {
+            if (errorType === "required") {
+              errorMessages.push(val.toUpperCase() + " field is a mandatory.");
+            } else if (errorType === "regex") {
+              errorMessages.push(val.toUpperCase() + " field is invalid.");
+            }
+          });
         }
-        alert(errorMessages);
+        this.setState({ error: errorMessages });
       }
     } else if (id === "submitAnotherOne") {
       this.setState({
@@ -120,8 +118,6 @@ class ContactForm extends Component {
       });
     }
   }
-
-  // Object.keys(data.shareInfo[i]).length
 
   pageLevelValidation = (data) => {
     let errors = {
@@ -139,10 +135,6 @@ class ContactForm extends Component {
     }
     return errors;
   };
-
-  onGoogleLogin = (event, status) => {
-    status === "success" ? this.setState({ stepIndex: 2 }):this.setState({ stepIndex: 1 })
-  }
 
   render() {
     if (this.state.stepIndex === 1) {
@@ -170,7 +162,6 @@ class ContactForm extends Component {
                 <Google
                   contactInformation={this.state.contactInformation}
                   updateContactInformation={this.updateContactInformation}
-                  onGoogleLogin={this.onGoogleLogin}
                 />
               </div>
             </Card>
@@ -183,6 +174,19 @@ class ContactForm extends Component {
           <Typography variant="h1" component="h2" gutterBottom align="center">
             CONTACT FORM
           </Typography>
+          <div>
+            {this.state.error.map((eachErrorMessage) => {
+              return (
+                <div>
+                  <Alert severity="error" disable={true}>
+                    <AlertTitle>
+                      <strong>{eachErrorMessage}</strong>
+                    </AlertTitle>
+                  </Alert>
+                </div>
+              );
+            })}
+          </div>
           <Grid
             container
             spacing={0}

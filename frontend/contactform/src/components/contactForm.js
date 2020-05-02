@@ -21,13 +21,14 @@ class ContactForm extends Component {
         staus: null,
         data: null,
       },
-      stepIndex: 2,
+      stepIndex: 1,
       error: [],
     };
     // Binding event handlers
     this.updateContactInformation = this.updateContactInformation.bind(this);
     this.onButtonPress = this.onButtonPress.bind(this);
     this.pageLevelValidation = this.pageLevelValidation.bind(this);
+    this.onGoogleLogin = this.onGoogleLogin.bind(this);
     // RegEx patterns to validate fields
     this.regExPatterns = {
       name: /^[a-zA-Z ]{2,30}$/,
@@ -136,6 +137,10 @@ class ContactForm extends Component {
     return errors;
   };
 
+  onGoogleLogin = (event, status) => {
+    status === "success" ? this.setState({ stepIndex: 2 }) : this.setState({ stepIndex: 1 })
+  }
+
   render() {
     if (this.state.stepIndex === 1) {
       return (
@@ -162,6 +167,7 @@ class ContactForm extends Component {
                 <Google
                   contactInformation={this.state.contactInformation}
                   updateContactInformation={this.updateContactInformation}
+                  onGoogleLogin={this.onGoogleLogin}
                 />
               </div>
             </Card>

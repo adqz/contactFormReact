@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import MyTextField from './myTextField';
 import MyButton from './myButton';
+import Google from './google';
+// import MyAlert from './myAlert';
+// import { Alert, AlertTitle } from '@material-ui/lab';
 
 class ContactForm extends Component {
     constructor(props) {
@@ -11,6 +14,10 @@ class ContactForm extends Component {
                 name: '',
                 email: '',
                 message: '',
+            },
+            apiResponse: {
+                staus: null,
+                data: null,
             },
         };
         // Binding event handlers
@@ -29,6 +36,10 @@ class ContactForm extends Component {
     updateContactInformation = (updatedContactInformation) => {
         this.setState({ contactInformation: updatedContactInformation});
     }
+
+    updateApiResponse = (response) => {
+        this.setState({ apiResponse: response })
+    }
     
     onButtonPress(event) {
         event.preventDefault()
@@ -40,11 +51,32 @@ class ContactForm extends Component {
             data: JSON.stringify(this.state.contactInformation),
         })
         .then(response => {
-            console.log(response)
+            this.updateApiResponse(response)
+            console.log(this.state.apiResponse)
         })
         .catch(error => {
+            this.updateApiResponse(error)
             console.log(error)
         })
+
+    }
+
+    renderAlert = () => {
+        if (this.state.apiResponse.status === 200) {
+            return (
+                <div>
+                    {alert(this.state.apiResponse.data)}
+                </div>
+            )
+        } else if (this.state.apiResponse.status === 502) {
+            return (
+                <div>
+                    {alert('All sucks')}
+                </div>
+            )
+        } else {
+            return
+        }
     }
 
     render() {
@@ -84,6 +116,16 @@ class ContactForm extends Component {
                     onButtonPress={this.onButtonPress}
                     />
                 </div>
+                
+                <div>
+                    <Google 
+                    contactInformation={this.state.contactInformation}
+                    updateContactInformation={this.updateContactInformation}
+                    />
+                </div>
+
+                {/* {this.renderAlert()} */}
+
             </div>
         );
     }
